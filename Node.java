@@ -3,6 +3,8 @@
 // Class:       COMP282
 // Assignment:  Project 2
 
+import java.util.Stack;
+
 public class Node<K extends Comparable, V>{
     private K key;
     private V value;
@@ -37,5 +39,38 @@ public class Node<K extends Comparable, V>{
         }
         return false;
 
+    }
+
+    public boolean containsValue(V valuearg) {
+
+        Stack<Node> tree = new Stack<>();
+
+        Node tmp = this;
+
+        if (tmp.value.equals(valuearg))
+            return true;
+
+        while (tmp != null) {
+            tree.push(tmp);
+            tmp = tmp.left;
+        }
+
+        while (tree.size() > 0) {
+
+            tmp = tree.pop();
+
+            if (tmp.value.equals(valuearg))
+                return true;
+
+            if (tmp.right != null) {
+                tmp = tmp.right;
+
+                while (tmp != null) {
+                    tree.push(tmp);
+                    tmp = tmp.left;
+                }
+            }
+        }
+        return false;
     }
 }
