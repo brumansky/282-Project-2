@@ -73,4 +73,23 @@ public class Node<K extends Comparable, V>{
         }
         return false;
     }
+
+    public V get(K keyarg) {
+
+        Node tmp = this;
+        int difference;
+
+        while (tmp != null) {
+            difference = keyarg.compareTo(tmp.key);
+            if (difference == 0)
+                return (V) tmp.value;
+            else if (difference > 0) {
+                tmp = tmp.right;
+            } else {
+                tmp = tmp.left;
+            }
+
+        }
+        return null;
+    }
 }
