@@ -164,4 +164,33 @@ public class Node<K extends Comparable, V> {
         }
         return null;
     }
+
+    private void rotateRight() {
+        Node tmp = right;
+        right = left;
+        left = right.left;
+        right.left = right.right;
+        right.right = tmp;
+        K ktmp = key;
+        key = right.key;
+        right.key = ktmp;
+        V vtmp = value;
+        value = right.value;
+        right.value = vtmp;
+
+    }
+
+    private void leftRotate() {
+        Node tmp = left;
+        left = right;
+        right = left.right;
+        left.right = left.left;
+        left.left = tmp;
+        K ktmp = key;
+        key = left.key;
+        left.key = ktmp;
+        V vtmp = value;
+        value = left.value;
+        left.value = vtmp;
+    }
 }
