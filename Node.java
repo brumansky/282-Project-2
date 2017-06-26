@@ -1,3 +1,7 @@
+// Team Member: Gage Aschenbrenner
+// Team Member: Brandon Umansky
+// Class:       COMP282
+// Assignment:  Project 2
 
 public class Node<K extends Comparable, V>{
     private K key;
