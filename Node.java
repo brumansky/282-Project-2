@@ -23,7 +23,7 @@ public class Node<K extends Comparable, V>{
 
         Node tmp = this;
         int difference;
-        
+
         while (tmp != null) {
             difference = keyarg.compareTo(tmp.key);
             if (difference == 0)
