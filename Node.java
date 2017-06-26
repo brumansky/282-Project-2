@@ -5,7 +5,10 @@
 
 import java.util.Stack;
 
-public class Node<K extends Comparable, V>{
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class Node<K extends Comparable, V> {
+
     private K key;
     private V value;
     private Node<K , V> right;
@@ -13,12 +16,12 @@ public class Node<K extends Comparable, V>{
     private boolean isRed;
 
     Node (K keyarg, V valuearg) {
+
         key = keyarg;
         value = valuearg;
         left = null;
         right = null;
         isRed = true;
-
     }
 
     public boolean containsKey(K keyarg) {
@@ -35,10 +38,79 @@ public class Node<K extends Comparable, V>{
             } else {
                 tmp = tmp.left;
             }
-
         }
         return false;
+    }
 
+    public V put(K key, V val, AtomicBoolean replaced) {
+
+        Node<K, V> parent = null;
+        Node<K, V> temp = this;
+
+        if (parent == null)
+            temp.isRed = false;
+
+        V result = null;
+        int diff = -1;
+
+        replaced.set(false);
+
+        while (temp != null) {
+            diff = key.compareTo(temp.key);
+            if (diff == 0) { // replacement
+                replaced.set(true);
+                result = temp.value;
+                temp.value = val;
+            } else if (diff < 0) { // left direction
+                if (temp.left == null) {
+                    left = new Node<>(key, val);
+                    return null;
+                } else {
+                    parent = temp;
+                    temp = temp.left;
+                }
+            } else { // right direction
+                if (temp.right == null) {
+                    right = new Node<>(key, val);
+                    return null;
+                } else {
+                    parent = temp;
+                    temp = temp.right;
+                }
+            }
+        }
+        return result;
+    }
+
+    public void print() {
+
+        if (this == null)
+            return;
+        Stack<Node> stack = new Stack<Node>();
+        Node node = this;
+
+        while (node != null) {
+            stack.push(node);
+            node = node.left;
+        }
+
+        while (stack.size() > 0) {
+            node = stack.pop();
+            System.out.println(node);
+            if (node.right != null) {
+                node = node.right;
+                while (node != null) {
+                    stack.push(node);
+                    node = node.left;
+                }
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+
+        return "Key: " + key + "\tValue :" + value;
     }
 
     public boolean containsValue(V valuearg) {
