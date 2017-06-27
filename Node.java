@@ -24,6 +24,45 @@ public class Node<K extends Comparable, V> {
         isRed = true;
     }
 
+    public V put (K keyarg, V valarg, AtomicBoolean replaced) {
+        Node parent = null;
+        Node tmp = this;
+
+        //if (parent == null)
+        //    tmp.isRed = false;
+        // this would make every node black always true
+
+        V result = null;
+        int diff = 1;
+
+        while (diff != 0 && tmp != null) {
+            diff =  keyarg.compareTo(tmp.key);
+
+            if (diff == 0) {
+                replaced.set(true);
+                result = (V) tmp.value;
+                tmp.value = valarg;
+            } else if (diff < 0) {
+                if (tmp.left == null) {
+                    tmp.left = new Node<>(keyarg,valarg);
+                    return null;
+                } else {
+                    parent = tmp;
+                    tmp = tmp.left;
+                }
+            } else {
+                if (tmp.right == null) {
+                    tmp.right = new Node<>(keyarg,valarg);
+                    return null;
+                } else {
+                    parent = tmp;
+                    tmp = tmp.right;
+                }
+            }
+        }
+        return result;
+    }
+
     public boolean containsKey(K keyarg) {
 
         Node tmp = this;
@@ -40,46 +79,6 @@ public class Node<K extends Comparable, V> {
             }
         }
         return false;
-    }
-
-    public V put(K key, V val, AtomicBoolean replaced) {
-
-        Node<K, V> parent = null;
-        Node<K, V> temp = this;
-
-        if (parent == null)
-            temp.isRed = false;
-
-        V result = null;
-        int diff = -1;
-
-        replaced.set(false);
-
-        while (temp != null) {
-            diff = key.compareTo(temp.key);
-            if (diff == 0) { // replacement
-                replaced.set(true);
-                result = temp.value;
-                temp.value = val;
-            } else if (diff < 0) { // left direction
-                if (temp.left == null) {
-                    left = new Node<>(key, val);
-                    return null;
-                } else {
-                    parent = temp;
-                    temp = temp.left;
-                }
-            } else { // right direction
-                if (temp.right == null) {
-                    right = new Node<>(key, val);
-                    return null;
-                } else {
-                    parent = temp;
-                    temp = temp.right;
-                }
-            }
-        }
-        return result;
     }
 
     public void print() {
@@ -192,5 +191,11 @@ public class Node<K extends Comparable, V> {
         V vtmp = value;
         value = left.value;
         left.value = vtmp;
+    }
+
+    private void recolor() {
+        this.isRed = true;
+        this.left.isRed = false;
+        this.right.isRed = false;
     }
 }

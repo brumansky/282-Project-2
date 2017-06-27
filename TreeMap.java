@@ -5,7 +5,7 @@
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TreeMap<K extends Comparable<K>, V>{
+public class TreeMap<K extends Comparable, V>{
 
     private int size;
     private Node root;
@@ -26,6 +26,7 @@ public class TreeMap<K extends Comparable<K>, V>{
 
         if (root == null) {
             root = new Node<K, V>(key, val);
+            size++;
             return null;
         }
         else {

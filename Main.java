@@ -8,10 +8,12 @@ public class Main {
     public static void main(String[] args) {
 
         TreeMap tree = new TreeMap();
+
         tree.put(6, 16);
         tree.put(1, 22);
         tree.put(2, 14);
         tree.put(5, 19);
         tree.print();
+
     }
 }
