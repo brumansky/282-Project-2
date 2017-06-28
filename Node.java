@@ -24,16 +24,39 @@ public class Node<K extends Comparable, V> {
         isRed = true;
     }
 
+    Node (K keyarg, V valuearg, boolean red) {
+
+        key = keyarg;
+        value = valuearg;
+        left = null;
+        right = null;
+        isRed = red;
+    }
+
     public V put (K keyarg, V valarg, AtomicBoolean replaced) {
-        Node parent = null;
-        Node tmp = this;
+        Node grandparent = null;
+        Node parent = this;
+        Node tmp = null;
 
         //if (parent == null)
         //    tmp.isRed = false;
         // this would make every node black always true
 
         V result = null;
-        int diff = 1;
+        int diff = keyarg.compareTo(parent.key);;
+
+        if (diff < 0 && parent.left != null)
+            tmp = parent.left;
+        else if (diff > 0 && parent.right != null)
+            tmp = parent.right;
+        else {
+            tmp = parent;
+        }
+
+        if (this.right != null && this.left != null) {
+            if (this.right.isRed && this.left.isRed)
+                this.recolor();
+        }
 
         while (diff != 0 && tmp != null) {
             diff =  keyarg.compareTo(tmp.key);
@@ -43,18 +66,77 @@ public class Node<K extends Comparable, V> {
                 result = (V) tmp.value;
                 tmp.value = valarg;
             } else if (diff < 0) {
+
+                //Don't step on a four node!!!
+                if (parent.right != null) {
+                    if (tmp.isRed && parent.right.isRed) {
+                        parent.recolor();
+
+                        // fixes case when recolored and parent is red
+                        if (grandparent != null) {
+                            if (grandparent.isRed) {
+                                if (keyarg.compareTo(this.key) < 0)
+                                    this.rotateRight();
+                                else
+                                    this.rotateLeft();
+                            }
+                            //TODO fix this ^ so it doesn't rotate root, not sure how though
+
+                            //root is always black
+                            this.isRed = false;
+                        }
+                    }
+                }
+
                 if (tmp.left == null) {
                     tmp.left = new Node<>(keyarg,valarg);
+
+                    //Red nodes can't have red children!!!
+                    if (tmp.isRed) {
+                        if (tmp.equals(parent.right))
+                            tmp.rotateLeft();
+
+                        parent.rotateRight();
+                    }
                     return null;
                 } else {
+                    grandparent = parent;
                     parent = tmp;
                     tmp = tmp.left;
                 }
             } else {
+
+                //Don't step on a four node!!!
+                if (parent.left != null) {
+                    if (tmp.isRed && parent.left.isRed) {
+                        parent.recolor();
+
+                        //fixes case when recolored and parent is red
+                        if (grandparent != null) {
+                            if (grandparent.isRed) {
+                                if (keyarg.compareTo(this.key) < 0)
+                                    this.rotateRight();
+                                else
+                                    this.rotateLeft();
+                            }
+                            //root is always black
+                            this.isRed = false;
+                        }
+                    }
+                }
+
                 if (tmp.right == null) {
                     tmp.right = new Node<>(keyarg,valarg);
+                    if (tmp.isRed) {
+
+                        if (tmp.equals(parent.left))
+                            tmp.rotateRight();
+
+                        parent.rotateLeft();
+                    }
                     return null;
                 } else {
+                    grandparent = parent;
                     parent = tmp;
                     tmp = tmp.right;
                 }
@@ -109,7 +191,7 @@ public class Node<K extends Comparable, V> {
     @Override
     public String toString() {
 
-        return "Key: " + key + "\tValue :" + value;
+        return "Key: " + key + "\tValue: " + value + "\tRed: " + isRed;
     }
 
     public boolean containsValue(V valuearg) {
@@ -167,9 +249,11 @@ public class Node<K extends Comparable, V> {
     private void rotateRight() {
         Node tmp = right;
         right = left;
-        left = right.left;
-        right.left = right.right;
-        right.right = tmp;
+        if (right != null) {
+            left = right.left;
+            right.left = right.right;
+            right.right = tmp;
+        }
         K ktmp = key;
         key = right.key;
         right.key = ktmp;
@@ -179,12 +263,14 @@ public class Node<K extends Comparable, V> {
 
     }
 
-    private void leftRotate() {
+    private void rotateLeft() {
         Node tmp = left;
         left = right;
-        right = left.right;
-        left.right = left.left;
-        left.left = tmp;
+        if (left != null) {
+            right = left.right;
+            left.right = left.left;
+            left.left = tmp;
+        }
         K ktmp = key;
         key = left.key;
         left.key = ktmp;
@@ -198,4 +284,6 @@ public class Node<K extends Comparable, V> {
         this.left.isRed = false;
         this.right.isRed = false;
     }
+
+    private boolean isFourNode() { return (this.right.isRed && this.left.isRed); }
 }

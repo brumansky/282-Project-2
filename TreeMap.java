@@ -25,7 +25,7 @@ public class TreeMap<K extends Comparable, V>{
     public V put(K key, V val) {
 
         if (root == null) {
-            root = new Node<K, V>(key, val);
+            root = new Node<K, V>(key, val, false);
             size++;
             return null;
         }
