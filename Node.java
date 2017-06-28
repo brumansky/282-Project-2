@@ -3,6 +3,8 @@
 // Class:       COMP282
 // Assignment:  Project 2
 
+import javafx.scene.Parent;
+
 import java.util.Stack;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,116 +35,129 @@ public class Node<K extends Comparable, V> {
         isRed = red;
     }
 
-    public V put (K keyarg, V valarg, AtomicBoolean replaced) {
-        Node grandparent = null;
+    public V put(K keyarg, V valarg, AtomicBoolean replaced) {
         Node parent = this;
         Node tmp = null;
 
-        //if (parent == null)
-        //    tmp.isRed = false;
-        // this would make every node black always true
+
+        int diff = keyarg.compareTo(this.key);
+
+
+        if (diff < 0 && parent.left != null) {
+            tmp = parent.left;
+            if (tmp.isFourNode()) {
+                tmp.recolor();
+            }
+        } else if (diff > 0 && parent.right != null) {
+            tmp = parent.right;
+            if (tmp.isFourNode()) {
+                tmp.recolor();
+            }
+        }else {
+            tmp = parent;
+            parent = null;
+        }
+
+
+        if (parent == null)
+            tmp.isRed = false;
+
+        replaced.set(false);
 
         V result = null;
-        int diff = keyarg.compareTo(parent.key);;
 
-        if (diff < 0 && parent.left != null)
-            tmp = parent.left;
-        else if (diff > 0 && parent.right != null)
-            tmp = parent.right;
-        else {
-            tmp = parent;
+        if (parent != null) {
+            if (parent.isFourNode()) {
+                parent.recolor();
+                this.isRed = false;
+            }
         }
 
-        if (this.right != null && this.left != null) {
-            if (this.right.isRed && this.left.isRed)
-                this.recolor();
-        }
-
-        while (diff != 0 && tmp != null) {
-            diff =  keyarg.compareTo(tmp.key);
-
-            if (diff == 0) {
+        do {
+            diff = keyarg.compareTo(tmp.key);
+            if (diff == 0) { // replacement!
                 replaced.set(true);
-                result = (V) tmp.value;
+                result = (V)tmp.value;
                 tmp.value = valarg;
-            } else if (diff < 0) {
+            } else if (diff < 0) { //left hand direction
+                if (tmp.left == null) { // add a new item
+                    tmp.left = new Node<>(keyarg, valarg);
 
-                //Don't step on a four node!!!
-                if (parent.right != null) {
-                    if (tmp.isRed && parent.right.isRed) {
-                        parent.recolor();
 
-                        // fixes case when recolored and parent is red
-                        if (grandparent != null) {
-                            if (grandparent.isRed) {
-                                if (keyarg.compareTo(this.key) < 0)
-                                    this.rotateRight();
-                                else
-                                    this.rotateLeft();
-                            }
-                            //TODO fix this ^ so it doesn't rotate root, not sure how though
-
-                            //root is always black
-                            this.isRed = false;
-                        }
-                    }
-                }
-
-                if (tmp.left == null) {
-                    tmp.left = new Node<>(keyarg,valarg);
-
-                    //Red nodes can't have red children!!!
+                    //fix linear four node
                     if (tmp.isRed) {
-                        if (tmp.equals(parent.right))
-                            tmp.rotateLeft();
+                        if (parent.left.equals(tmp)) {
 
-                        parent.rotateRight();
+                            parent.rotateRight();
+
+                        } else {
+                            tmp.rotateRight();
+                            parent.rotateLeft();
+                        }
                     }
                     return null;
                 } else {
-                    grandparent = parent;
+                    // fix four node
+                    if (tmp.left.isFourNode())
+                        tmp = fixRecolor(parent, tmp, true);
+
                     parent = tmp;
                     tmp = tmp.left;
                 }
-            } else {
+            } else {  // right hand direction
+                if (tmp.right == null) { // add a new item
+                    tmp.right = new Node<>(keyarg, valarg);
 
-                //Don't step on a four node!!!
-                if (parent.left != null) {
-                    if (tmp.isRed && parent.left.isRed) {
-                        parent.recolor();
+                    //fix linear four node
+                    if (tmp.isRed) {
+                        if (parent.right.equals(tmp)) {
+                            parent.rotateLeft();
 
-                        //fixes case when recolored and parent is red
-                        if (grandparent != null) {
-                            if (grandparent.isRed) {
-                                if (keyarg.compareTo(this.key) < 0)
-                                    this.rotateRight();
-                                else
-                                    this.rotateLeft();
-                            }
-                            //root is always black
-                            this.isRed = false;
+                        } else {
+
+                            tmp.rotateLeft();
+                            parent.rotateRight();
                         }
                     }
-                }
 
-                if (tmp.right == null) {
-                    tmp.right = new Node<>(keyarg,valarg);
-                    if (tmp.isRed) {
-
-                        if (tmp.equals(parent.left))
-                            tmp.rotateRight();
-
-                        parent.rotateLeft();
-                    }
                     return null;
                 } else {
-                    grandparent = parent;
+
+                    //fix four node
+                    if (tmp.right.isFourNode())
+                        tmp = fixRecolor(parent, tmp, false);
+
                     parent = tmp;
                     tmp = tmp.right;
                 }
             }
-        }
+        } while (diff != 0 && tmp != null);
         return result;
+    }
+
+    private Node fixRecolor(Node parent, Node tmp, boolean isLeft) {
+        if (isLeft) {
+            tmp.left.recolor();
+            if (parent.left.equals(tmp)) {
+                parent.rotateLeft();
+                return parent;
+            } else {
+                tmp.rotateRight();
+                parent.rotateLeft();
+                return parent.right;
+            }
+        } else {
+            tmp.right.recolor();
+            if (parent.right.equals(tmp)) {
+                parent.rotateLeft();
+                return parent;
+            } else {
+                tmp.rotateLeft();
+                parent.rotateRight();
+
+                return parent;
+            }
+        }
     }
 
     public boolean containsKey(K keyarg) {
@@ -285,5 +300,9 @@ public class Node<K extends Comparable, V> {
         this.right.isRed = false;
     }
 
-    private boolean isFourNode() { return (this.right.isRed && this.left.isRed); }
+    private boolean isFourNode() {
+        if (this.right != null && this.left != null)
+            return (this.right.isRed && this.left.isRed);
+        return false;
+    }
 }
