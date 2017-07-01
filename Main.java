@@ -18,32 +18,34 @@ public class Main {
         tree.put(7, 10);
         tree.put(8, 50);
         tree.put(9, 69);
-            */
+*/
+        tree.print();
+        System.out.println("Size: " + tree.size());
 /*
-        tree.put(14, 1);
-        tree.put(6, 2);
-        tree.put(15, 3);
-        tree.put(3, 1);
-        tree.put(7, 1);
-        tree.put(8, 4);
-        tree.put(9, 42);
-        tree.put(10, 21);
-
-/*
-        tree.put(5, 1);
-        tree.put(10, 1);
-        tree.put(20, 1);
-        tree.put(15, 1);
-        tree.put(25, 1);
-        tree.put(12, 1);
-        tree.put(17, 1);
-        tree.put(18, 1);
+        System.out.println("Size: " + tree.size());
+        System.out.println("isEmpty: " + tree.isEmpty());
+        System.out.println("Get: " + tree.get(9));
+        System.out.println("ContainsKey: " + tree.containsKey(9));
+        System.out.println("ContainsValue: " + tree.containsValue(9));
+        System.out.println("ContainsValue: " + tree.containsValue(50));
+        System.out.println("Clear: ");
+        tree.clear();
+        tree.print();
 */
 
-        for (int i = 1; i < 16; i++) {
+        for (int i = 5; i > 1; i--) {
             tree.put(i, i);
         }
         tree.print();
+        System.out.println("Size: " + tree.size());
+
+        tree.remove(1);
+        //tree.remove(15);
+        //tree.remove(8);
+        //tree.remove(3);
+        tree.print();
+        System.out.println("Size: " + tree.size());
+
 
     }
 }

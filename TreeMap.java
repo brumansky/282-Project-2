@@ -22,6 +22,30 @@ public class TreeMap<K extends Comparable, V>{
 
     public void clear() { root = null; }
 
+    public V get(K key) {
+
+        if (root == null)
+            return null;
+        else
+            return (V)root.get(key);
+    }
+
+    public boolean containsKey(K key) {
+
+        if (root == null)
+            return false;
+        else
+            return root.containsKey(key);
+    }
+
+    public boolean containsValue(V value) {
+
+        if (root == null)
+            return false;
+        else
+            return root.containsValue(value);
+    }
+
     public V put(K key, V val) {
 
         if (root == null) {
@@ -38,8 +62,20 @@ public class TreeMap<K extends Comparable, V>{
         }
     }
 
+    public V remove(K key) {
+
+        AtomicBoolean removed = new AtomicBoolean(false);
+        V result = (V)root.remove(key, removed);
+        if (removed.get()) {
+            size--;
+        }
+        if (size == 0)
+            root = null;
+        return result;
+    }
+
     public void print() {
-        root.print();
-        System.out.println("Size: " + size);
+        if (root != null)
+            root.print();
     }
 }
