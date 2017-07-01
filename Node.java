@@ -40,6 +40,7 @@ public class Node<K extends Comparable, V> {
         Node tmp = null;
 
 
+
         int diff = keyarg.compareTo(this.key);
 
 
@@ -98,8 +99,18 @@ public class Node<K extends Comparable, V> {
                     return null;
                 } else {
                     // fix four node
-                    if (tmp.left.isFourNode())
-                        tmp = fixRecolor(parent, tmp, true);
+                    if (tmp.left.isFourNode()) {
+                        tmp.left.recolor();
+
+                        if (tmp.isRed)
+                            tmp = fixRecolor(parent, tmp, true);
+                    }
+
+                    if (tmp.isFourNode() && parent.isRed == false) {
+                        tmp.recolor();
+                    }
+
+                    this.isRed = false;
 
                     parent = tmp;
                     tmp = tmp.left;
@@ -124,8 +135,19 @@ public class Node<K extends Comparable, V> {
                 } else {
 
                     //fix four node
-                    if (tmp.right.isFourNode())
-                        tmp = fixRecolor(parent, tmp, false);
+                    if (tmp.right.isFourNode()) {
+                        tmp.right.recolor();
+
+                        if (tmp.isRed) {
+                            tmp = fixRecolor(parent, tmp, false);
+                        }
+                    }
+
+                    if (tmp.isFourNode() && parent.isRed == false) {
+                        tmp.recolor();
+                    }
+
+                    this.isRed = false;
 
                     parent = tmp;
                     tmp = tmp.right;
@@ -137,7 +159,6 @@ public class Node<K extends Comparable, V> {
 
     private Node fixRecolor(Node parent, Node tmp, boolean isLeft) {
         if (isLeft) {
-            tmp.left.recolor();
             if (parent.left.equals(tmp)) {
                 parent.rotateLeft();
                 return parent;
@@ -147,7 +168,7 @@ public class Node<K extends Comparable, V> {
                 return parent.right;
             }
         } else {
-            tmp.right.recolor();
+
             if (parent.right.equals(tmp)) {
                 parent.rotateLeft();
                 return parent;

@@ -19,7 +19,7 @@ public class Main {
         tree.put(8, 50);
         tree.put(9, 69);
             */
-
+/*
         tree.put(14, 1);
         tree.put(6, 2);
         tree.put(15, 3);
@@ -40,6 +40,9 @@ public class Main {
         tree.put(18, 1);
 */
 
+        for (int i = 1; i < 16; i++) {
+            tree.put(i, i);
+        }
         tree.print();
 
     }
