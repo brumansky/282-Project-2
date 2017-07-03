@@ -174,30 +174,48 @@ public class Node<K extends Comparable, V> {
 
         Node current = this;
         Node parent = null;
-        V deletedValue = rootCases(current, removed);
-
-        if (deletedValue != null)
-            return deletedValue;
+        V deletedValue = null;
 
         while (current != null) {
             int diff = key.compareTo(current.key);
-            System.out.println("PARENT" + parent);
-            System.out.println("CURRENT " + current);
-            System.out.println("DIFF " + diff);
+
+            // Traversing
             if (diff < 0) {
                 parent = current;
-                current = fix2node(current, current.left);
+                if (current.left != null)
+                    current = fix2node(current, current.left);
             } else if (diff > 0) {
                 parent = current;
-                current = fix2node(current, current.right);
+                if (current.right != null)
+                    current = fix2node(current, current.right);
+
             } else {
-                //System.out.println("Current: " + current);
-                //System.out.println("Parent: " + parent);
-                //System.out.println("Root: " + this);
-                if (parent.left.key.compareTo(current.key) < 0)
-                    parent.left = null;
-                else if (parent.right.key.compareTo(current.key) > 0)
-                    parent.right = null;
+                // Root Case
+                if (parent == null) {
+                    Node successor = successorOf(current);
+                    swapNodes(successor, current);
+                    Node successorParent = successorsParent(current);
+                    if (successorParent.left.equals(successor)) {
+                        deletedValue = (V) successorParent.left.value;
+                        successorParent.left = null;
+                    } else {
+                        deletedValue = (V) successorParent.right.value;
+                        successorParent.right = null;
+                    }
+                }
+                // Deleting the node
+                else if (parent.left != null) {
+                    if (parent.left.key.compareTo(current.key) == 0) {
+                        deletedValue = (V) parent.left.value;
+                        parent.left = null;
+                    }
+                }
+                else if (parent.right != null) {
+                    if (parent.right.key.compareTo(current.key) == 0) {
+                        deletedValue = (V) parent.right.value;
+                        parent.right = null;
+                    }
+                }
                 removed.set(true);
                 break;
             }
@@ -209,38 +227,38 @@ public class Node<K extends Comparable, V> {
 
         if (dest.isTwoNode()) {
             if (!current.isRed) {
-                if (dest.equals(current.left)) {
+                if (dest.key.compareTo(current.left.key) == 0) {
                     current.rotateLeft();
                     current = current.left;
-
-                    System.out.println("TEST");
                 } else {
                     current.rotateRight();
                     current = dest;
                 }
             }
-        }
-        else if (dest.equals(current.left)) {
-            System.out.println(current + "CURRENT");
-            if (current.right.isTwoNode()) {
-                current.isRed = true;
-                dest.isRed = false;
-                current.right.isRed = false;
-            } else if (!(current.right.left == null || !current.right
-                    .left.isRed)) {
-                current.right.rotateRight();
+
+            if (dest.key.compareTo(current.left.key) == 0) {
+                if (current.right.isTwoNode()) {
+                    current.isRed = true;
+                    dest.isRed = false;
+                    current.right.isRed = false;
+                } else if (!((current.right.left == null) || !(current.right.left
+                        .isRed))) {
+                    current.right.rotateRight();
+                }
+                current.rotateLeft();
+
+            } else {
+                if (current.left.isTwoNode()) {
+                    current.isRed = true;
+                    dest.isRed = false;
+                    current.left.isRed = false;
+                }
+                if (!((current.left.right == null) || !(current.left.right
+                        .isRed))) {
+                    current.left.rotateLeft();
+                }
+                current.rotateRight();
             }
-            current.rotateLeft();
-        } else {
-            if (current.left.isTwoNode()) {
-                current.isRed = true;
-                dest.isRed = false;
-                current.left.isRed = false;
-            } else if (!(current.left.right == null || !current.left
-                    .right.isRed)) {
-                current.left.rotateLeft();
-            }
-            current.rotateRight();
         }
         current = dest;
         return current;
@@ -417,6 +435,7 @@ public class Node<K extends Comparable, V> {
         return temp;
     }
 
+    // In order successor's parent for deletion after swap
     private Node successorsParent(Node parent) {
 
         Node temp = null;
@@ -435,27 +454,6 @@ public class Node<K extends Comparable, V> {
         return temp;
     }
 
-    private void reLink(Node successor) {
-
-        if (successor.right != null)
-            successor = successor.right;
-    }
-
-    private V rootCases(Node current, AtomicBoolean removed) {
-
-        V deletedValue = null;
-
-        if (current.left == null && current.right == null) {
-            deletedValue = (V) current.value;
-            removed.set(true);
-            return deletedValue;
-        } else if (current.left.isTwoNode() && current.right.isTwoNode()) {
-            current.left.isRed = false;
-            current.right.isRed = false;
-        }
-        return deletedValue;
-    }
-
     private void swapNodes(Node current, Node successor) {
 
         V tempVal = (V) current.value;
@@ -464,13 +462,6 @@ public class Node<K extends Comparable, V> {
         current.key = successor.key;
         successor.key = tempKey;
         successor.value = tempVal;
-    }
-
-    private boolean isRightChild(Node parent) {
-
-        if (this.key.compareTo(parent.key) < 0)
-            return false;
-        return true;
     }
 
     @Override

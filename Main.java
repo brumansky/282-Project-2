@@ -33,16 +33,15 @@ public class Main {
         tree.print();
 */
 
-        for (int i = 5; i > 1; i--) {
+        for (int i = 5; i >= 1; i--) {
             tree.put(i, i);
         }
         tree.print();
         System.out.println("Size: " + tree.size());
 
         tree.remove(1);
-        //tree.remove(15);
-        //tree.remove(8);
-        //tree.remove(3);
+        tree.remove(3);
+        tree.remove(4);
         tree.print();
         System.out.println("Size: " + tree.size());
 
